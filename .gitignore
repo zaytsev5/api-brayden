@@ -1,0 +1,11 @@
+node_modules
+dist
+.env
+logs/*
+!logs/.gitkeep
+local.yml
+certs
+!certs/.gitkeep
+yarn.lock
+/src/swagger.json
+/src/routes/routes.ts

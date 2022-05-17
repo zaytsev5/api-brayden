@@ -1,0 +1,28 @@
+{
+  "swagger": {
+    "basePath": "/api/v1",
+    "schemes": ["http", "https"],
+    "entryFile": "./src/index.ts",
+    "specVersion": 3,
+    "outputDirectory": "./src",
+    "host": "localhost:3015",
+    "noImplicitAdditionalProperties" : "silently-remove-extras",
+    "controllerPathGlobs": [
+      "./src/controllers/*.ts"
+    ],
+    "securityDefinitions": {
+      "jwt": {
+        "type": "apiKey",
+        "name": "authorization",
+        "in": "header"
+      }
+    }
+  },
+  "routes": {
+    "basePath": "/api/v1",
+    "entryFile": "./src/index.ts",
+    "routesDir": "./src/routes",
+    "middleware": "express",
+    "authenticationModule": "./src/auth/authentication.ts"
+  }
+}
