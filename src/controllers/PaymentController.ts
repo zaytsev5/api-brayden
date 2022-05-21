@@ -35,12 +35,13 @@ export class PaymentController extends BaseController {
     };
     const charge = await Charge.create(chargeData);
     // return charge;
-    console.log(charge);
-    const result = charge ? { data: { hosted_url: charge.hosted_url }, status: true } : { status: false };
+    const result = charge
+      ? { data: { hosted_url: charge.hosted_url, code: charge.code }, status: true }
+      : { status: false };
     return this.handleResponse(result, HttpResponseCode.HTTP_OK, 'Please try again');
   }
 
-  @Security('jwt')
+  // @Security('jwt')
   @Post('stripe')
   @Response<ValidateErrorJSON>(HttpResponseCode.HTTP_VALIDATE_ERROR, 'Validation Failed')
   public async stripe(@Body() requestBody: IStripePaymentParams, @Request() request: any): Promise<any> {

@@ -20,7 +20,7 @@ class StripeRepository extends BaseRepository {
 
   async createCharge(params: Stripe.ChargeCreateParams): Promise<any> {
     try {
-      const data: any = await await this.stripe.charges.create(params);
+      const data: any = await this.stripe.charges.create(params);
 
       //TODO: store need data
       await this.storeTransaction({
