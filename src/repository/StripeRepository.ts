@@ -1,7 +1,6 @@
 import Stripe from 'stripe';
 import BaseRepository from './BaseRepository';
 import * as admin from 'firebase-admin';
-import { IPaymentTransaction } from '../types/payment';
 import { TXN_MODEL } from '../constants';
 
 class StripeRepository extends BaseRepository {
