@@ -1,11 +1,16 @@
 import Stripe from 'stripe';
 import BaseRepository from './BaseRepository';
+import * as admin from 'firebase-admin';
+import { IPaymentTransaction } from '../types/payment';
+import { TXN_MODEL } from '../constants';
 
 class StripeRepository extends BaseRepository {
+  protected db = admin.database().ref(TXN_MODEL);
   private opt: any = {
     apiVersion: process.env.STRIPE_API_VERSION || '2020-08-27',
   };
   private stripe = new Stripe(process.env.STRIPE_CLIENT_SECRET || '', this.opt);
+
   constructor() {
     super();
     const options: any = {
@@ -16,12 +21,20 @@ class StripeRepository extends BaseRepository {
 
   async createCharge(params: Stripe.ChargeCreateParams): Promise<any> {
     try {
+      const data: any = await await this.stripe.charges.create(params);
+
       //TODO: store need data
-      const data = await await this.stripe.charges.create(params);
-      return this.responseSuccess('', data);
+      await this.storeTransaction(data);
+      return this.responseSuccess('', {});
     } catch (e: any) {
       return this.responseError(e.message);
     }
+  }
+
+  async storeTransaction(params: IPaymentTransaction): Promise<any> {
+    params.type = 'stripe';
+    await this.db.child(params.id).set(params);
+    return this.responseSuccess('', {});
   }
 }
 

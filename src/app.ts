@@ -101,7 +101,10 @@ class App {
   }
 
   private initializeFirebase(): void {
-    admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+      databaseURL: 'https://payment-app-4bc33-default-rtdb.firebaseio.com/',
+    });
   }
 
   private handleError(): void {

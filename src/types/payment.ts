@@ -13,3 +13,12 @@ export interface IStripePaymentParams {
   decription?: string;
   metadata?: any;
 }
+
+export interface IPaymentTransaction {
+  id: string;
+  type: 'paypal' | 'stripe' | 'coinbase';
+  created: string;
+  amount: number;
+  payer: string;
+  username: string;
+}
