@@ -1,11 +1,11 @@
 'use strict';
 
 import { ValidateErrorJSON } from '../types';
-import { Route, Post, Response, Body, Tags, Request, Security } from 'tsoa';
+import { Route, Post, Response, Body, Tags, Request, Security, Get, Path } from 'tsoa';
 import { HttpResponseCode } from '../constants/http_response';
 import { BaseController } from './BaseController';
 import { CreateCharge, resources } from 'coinbase-commerce-node';
-import { ICoinbasePaymentParams, IStripePaymentParams, IPaymentTransaction } from '../types/payment';
+import { ICoinbasePaymentParams, IStripePaymentParams } from '../types/payment';
 import { DEFAULT_CHARGE_DATA } from '../constants/coinbase';
 import StripeRepository from '../repository/StripeRepository';
 import PaypalRepository from '../repository/PaypalRepository';
@@ -35,6 +35,7 @@ export class PaymentController extends BaseController {
     };
     const charge = await Charge.create(chargeData);
     // return charge;
+    console.log(charge);
     const result = charge ? { data: { hosted_url: charge.hosted_url }, status: true } : { status: false };
     return this.handleResponse(result, HttpResponseCode.HTTP_OK, 'Please try again');
   }
@@ -49,17 +50,32 @@ export class PaymentController extends BaseController {
   }
 
   // @Security('jwt')
-  @Post('store')
+  @Post('{type}/success')
   @Response<ValidateErrorJSON>(HttpResponseCode.HTTP_VALIDATE_ERROR, 'Validation Failed')
-  public async paypal(@Body() requestBody: IPaymentTransaction, @Request() request: any): Promise<any> {
-    console.log(request.user);
+  public async paypal(@Body() requestBody: any, @Path() type: string): Promise<any> {
+    // console.log(request.user);
     const result =
-      requestBody.type == 'paypal'
+      type == 'paypal'
         ? await new PaypalRepository().storeTransaction(requestBody)
         : requestBody.type == 'coinbase'
         ? await new CoinbaseRepository().storeTransaction(requestBody)
         : { status: true };
 
     return this.handleResponse(result, HttpResponseCode.HTTP_OK, result.message);
+  }
+
+  // TODO: remove
+  @Get('charge/paypal/{id}')
+  public async getOrder(@Path() id: string): Promise<any> {
+    await new PaypalRepository().getPaymentById(id);
+
+    return this.handleResponse({ status: true }, HttpResponseCode.HTTP_OK, '');
+  }
+
+  @Get('charge/stripe/{id}')
+  public async getStripe(@Path() id: string): Promise<any> {
+    await new StripeRepository().getChargeById(id);
+
+    return this.handleResponse({ status: true }, HttpResponseCode.HTTP_OK, '');
   }
 }

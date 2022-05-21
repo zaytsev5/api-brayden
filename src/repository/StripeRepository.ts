@@ -30,6 +30,17 @@ class StripeRepository extends BaseRepository {
       return this.responseError(e.message);
     }
   }
+  async getChargeById(id: string): Promise<any> {
+    try {
+      const data: any = await await this.stripe.charges.retrieve(id);
+
+      //TODO: store need data
+      console.log(data);
+      return this.responseSuccess('', data);
+    } catch (e: any) {
+      return this.responseError(e.message);
+    }
+  }
 
   async storeTransaction(params: IPaymentTransaction): Promise<any> {
     params.type = 'stripe';
