@@ -24,7 +24,13 @@ class StripeRepository extends BaseRepository {
       const data: any = await await this.stripe.charges.create(params);
 
       //TODO: store need data
-      await this.storeTransaction(data);
+      await this.storeTransaction({
+        id: data.id,
+        amount: data.amount,
+        currency: data.currency,
+        created: data.created,
+        type: 'stripe',
+      });
       return this.responseSuccess('', {});
     } catch (e: any) {
       return this.responseError(e.message);
@@ -42,7 +48,7 @@ class StripeRepository extends BaseRepository {
     }
   }
 
-  async storeTransaction(params: IPaymentTransaction): Promise<any> {
+  async storeTransaction(params: any): Promise<any> {
     params.type = 'stripe';
     await this.db.child(params.id).set(params);
     return this.responseSuccess('', {});

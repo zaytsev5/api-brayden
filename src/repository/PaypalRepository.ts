@@ -18,7 +18,7 @@ class PaypalRepository extends BaseRepository {
     delete data.links;
     delete data.httpStatusCode;
 
-    await this.db.child(data.id).set(data);
+    await this.db.child(data.id).set({ ...data, payer: params.payer, payee: params.payee });
     return this.responseSuccess('', {});
   }
 
