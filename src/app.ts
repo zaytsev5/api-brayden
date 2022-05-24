@@ -6,7 +6,6 @@ import helmet from 'helmet';
 import hpp from 'hpp';
 import morgan from 'morgan';
 import path from 'path';
-import session from 'express-session';
 import admin from 'firebase-admin';
 
 import { RegisterRoutes } from './routes/routes';
@@ -16,8 +15,7 @@ import { Client } from 'coinbase-commerce-node';
 import { isJson } from './utils/string';
 // const { Client, Webhook, resources } = require('coinbase-commerce-node');
 
-const serviceAccount = require('./configs/firebase/serviceAccountKey.json');
-const FileStore = require('session-file-store')(session);
+const { serviceAccount } = require('./configs/firebase');
 
 class App {
   public readonly app: express.Express;
@@ -31,7 +29,6 @@ class App {
 
     this.middleware();
     this.routes();
-    this.initializeSession();
     this.initializeErrorHandling();
     this.initializeFirebase();
     this.iniializeCoinbase();
@@ -75,18 +72,6 @@ class App {
     });
   }
 
-  private initializeSession(): void {
-    this.app.use(
-      session({
-        resave: false,
-        saveUninitialized: false,
-        secret: process.env.ENCRYPT_KEY,
-        store: new FileStore(),
-        expires: new Date(Date.now() + 30 * 86400 * 1000), // 30 days
-      }),
-    );
-  }
-
   private initializeErrorHandling(): void {
     // this.app.use(errorMiddleware);
   }
@@ -103,7 +88,7 @@ class App {
   private initializeFirebase(): void {
     admin.initializeApp({
       credential: admin.credential.cert(serviceAccount),
-      databaseURL: 'https://payment-app-4bc33-default-rtdb.firebaseio.com/',
+      databaseURL: process.env.DB_URL,
     });
   }
 
@@ -145,8 +130,7 @@ class App {
   }
 
   private iniializeCoinbase() {
-    const COINBASE_API_KEY = '637334de-94fe-4b51-9dd7-8c6f737cedf5';
-    Client.init(COINBASE_API_KEY);
+    Client.init(process.env.COINBASE_API_KEY || '637334de-94fe-4b51-9dd7-8c6f737cedf5');
   }
 }
 
