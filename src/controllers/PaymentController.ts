@@ -58,7 +58,7 @@ export class PaymentController extends BaseController {
     const result =
       type == 'paypal'
         ? await new PaypalRepository().storeTransaction(requestBody)
-        : requestBody.type == 'coinbase'
+        : type == 'coinbase'
         ? await new CoinbaseRepository().storeTransaction(requestBody)
         : { status: true };
 
