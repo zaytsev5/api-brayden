@@ -6,21 +6,20 @@ export async function expressAuthentication(request?: any, securityName?: string
 
     return new Promise(async (resolve, reject) => {
       if (!token) {
-        reject(new Error('No token provided'));
+        return reject({ status: 401, message: 'No token provided' });
       }
 
       admin
         .auth()
         .verifyIdToken(token)
         .then((user) => {
-          // for now, not using
           if (scopes && !scopes.includes(user.type)) {
             throw { status: 405, message: 'Not Permisison' };
           }
           resolve(user);
         })
         .catch(() => {
-          reject(new Error(JSON.stringify({ status: 401, message: 'Token is invalid' })));
+          return reject({ status: 401, message: 'Token is invalid' });
         });
     });
   }

@@ -12,7 +12,6 @@ import { RegisterRoutes } from './routes/routes';
 import { ValidateError } from 'tsoa';
 import { decrypt } from './utils/encrypt';
 import { Client } from 'coinbase-commerce-node';
-import { isJson } from './utils/string';
 // const { Client, Webhook, resources } = require('coinbase-commerce-node');
 
 const { serviceAccount } = require('./configs/firebase');
@@ -99,14 +98,11 @@ class App {
       res: express.Response,
       next: express.NextFunction,
     ) {
-      if (isJson(err.message)) {
-        const errJson = JSON.parse(err.message || '{}');
-        if (errJson?.status === 401) {
-          return res.status(401).json({
-            message: errJson?.message,
-            status: false,
-          });
-        }
+      if (err?.status < 500) {
+        return res.status(err.status).json({
+          message: err.message,
+          status: false,
+        });
       }
 
       if (err instanceof ValidateError) {
