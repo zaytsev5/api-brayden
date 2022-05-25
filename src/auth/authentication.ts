@@ -13,13 +13,12 @@ export async function expressAuthentication(request?: any, securityName?: string
         .auth()
         .verifyIdToken(token)
         .then((user) => {
-          if (scopes && !scopes.includes(user.type)) {
-            throw { status: 405, message: 'Not Permisison' };
-          }
+          if (scopes?.length && !scopes.includes(user.type)) throw new Error('Not found');
+
           resolve(user);
         })
-        .catch(() => {
-          return reject({ status: 401, message: 'Token is invalid' });
+        .catch((e) => {
+          reject({ status: 401, message: e.message });
         });
     });
   }
