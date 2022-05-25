@@ -24,23 +24,8 @@ export class AuthController extends BaseController {
   @Post('auth')
   @Response<ValidateErrorJSON>(HttpResponseCode.HTTP_VALIDATE_ERROR, 'Validation Failed')
   public async auth(@Body() requestBody: any, @Request() request: any): Promise<any> {
-    console.log(requestBody);
-    // const data = await admin.auth().verifyIdToken(requestBody.username);
     console.log(request.user);
-    // const { username, password, type } = requestBody;
 
-    // const { data } = await this.model.one({
-    //   where: { username, password: md5(password), type },
-    //   columns: ['id', 'type', 'role', 'username', 'email', 'first_name', 'last_name', 'verified'],
-    // });
-
-    // const privateKEY = fs.readFileSync('./private.key', 'utf8');
-
-    // const token = jwt.sign({ ...data }, privateKEY, {
-    //   expiresIn: '12h',
-    //   algorithm: 'RS256', // RSASSA [ "RS256", "RS384", "RS512" ]
-    // });
-
-    return { token: 'abc', status: true };
+    return { token: 'Token', status: true };
   }
 }

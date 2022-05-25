@@ -13,7 +13,7 @@ export async function expressAuthentication(request?: any, securityName?: string
         .auth()
         .verifyIdToken(token)
         .then((user) => {
-          console.log(user);
+          // for now, not using
           if (scopes && !scopes.includes(user.type)) {
             throw { status: 405, message: 'Not Permisison' };
           }

@@ -39,6 +39,7 @@ export class PaymentController extends BaseController {
     const result = charge
       ? { data: { hosted_url: charge.hosted_url, code: charge.code }, status: true }
       : { status: false };
+
     return this.handleResponse(result, HttpResponseCode.HTTP_OK, 'Please try again');
   }
 
@@ -52,15 +53,10 @@ export class PaymentController extends BaseController {
   }
 
   // @Security('jwt')
-  @Post('{type}/success')
+  @Post('paypal/success')
   @Response<ValidateErrorJSON>(HttpResponseCode.HTTP_VALIDATE_ERROR, 'Validation Failed')
-  public async paypal(@Body() requestBody: any, @Path() type: string): Promise<any> {
-    const result =
-      type == 'paypal'
-        ? await new PaypalRepository().storeTransaction(requestBody)
-        : type == 'coinbase'
-        ? await new CoinbaseRepository().storeTransaction(requestBody)
-        : { status: true };
+  public async paypal(@Body() requestBody: any): Promise<any> {
+    const result = await new PaypalRepository().storeTransaction(requestBody);
 
     return this.handleResponse(result, HttpResponseCode.HTTP_OK, result.message);
   }
@@ -88,9 +84,7 @@ export class PaymentController extends BaseController {
     const event = Webhook.verifyEventBody(rawBody, signature, webhookSecret);
 
     const storeData = preparePaymentData(event.data ?? null);
-    // console.log({ rawBody, signature, webhookSecret, event_type: event?.type });
     await new CoinbaseRepository().storeTransaction(storeData);
-    // await new StripeRepository().getChargeById(id);
 
     return this.handleResponse({ status: true }, HttpResponseCode.HTTP_OK, '');
   }

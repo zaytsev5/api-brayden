@@ -21,8 +21,6 @@ class StripeRepository extends BaseRepository {
   async createCharge(params: Stripe.ChargeCreateParams): Promise<any> {
     try {
       const data: any = await this.stripe.charges.create(params);
-
-      //TODO: store need data
       await this.storeTransaction({
         id: data.id,
         amount: data.amount,
@@ -30,6 +28,7 @@ class StripeRepository extends BaseRepository {
         created: data.created,
         payment_type: 'stripe',
       });
+
       return this.responseSuccess('', {});
     } catch (e: any) {
       return this.responseError(e.message);
@@ -37,10 +36,7 @@ class StripeRepository extends BaseRepository {
   }
   async getChargeById(id: string): Promise<any> {
     try {
-      const data: any = await await this.stripe.charges.retrieve(id);
-
-      //TODO: store need data
-      console.log(data);
+      const data = await this.stripe.charges.retrieve(id);
       return this.responseSuccess('', data);
     } catch (e: any) {
       return this.responseError(e.message);
@@ -49,6 +45,7 @@ class StripeRepository extends BaseRepository {
 
   async storeTransaction(params: any): Promise<any> {
     params.type = 'stripe';
+
     await this.db.child(params.id).set(params);
     return this.responseSuccess('', {});
   }
