@@ -10,16 +10,11 @@ class CoinbaseRepository extends BaseRepository {
     super();
   }
 
-  async storeTransaction(params: any): Promise<any> {
-    const { data: payment } = await this.getPaymentById(params.id);
+  async storeTransaction(data: any): Promise<any> {
+    if (!data) return;
 
-    await this.db.child(payment.id).set({
-      id: payment.id,
-      code: payment.code,
-      metadata: payment.metadata,
-      created_at: payment.created_at,
-      type: 'coinbase',
-    });
+    data.payment_type = 'coinbase';
+    await this.db.child(data.id).set(data);
     return this.responseSuccess('', {});
   }
 

@@ -4,12 +4,13 @@ import { ValidateErrorJSON } from '../types';
 import { Route, Post, Response, Body, Tags, Request, Security, Get, Path } from 'tsoa';
 import { HttpResponseCode } from '../constants/http_response';
 import { BaseController } from './BaseController';
-import { CreateCharge, resources } from 'coinbase-commerce-node';
+import { CreateCharge, resources, Webhook } from 'coinbase-commerce-node';
 import { ICoinbasePaymentParams, IStripePaymentParams } from '../types/payment';
 import { DEFAULT_CHARGE_DATA } from '../constants/coinbase';
 import StripeRepository from '../repository/StripeRepository';
 import PaypalRepository from '../repository/PaypalRepository';
 import CoinbaseRepository from '../repository/CoinbaseRepository';
+import { preparePaymentData } from '../utils/coinbase';
 
 @Route('payment')
 @Tags('Payment')
@@ -54,7 +55,6 @@ export class PaymentController extends BaseController {
   @Post('{type}/success')
   @Response<ValidateErrorJSON>(HttpResponseCode.HTTP_VALIDATE_ERROR, 'Validation Failed')
   public async paypal(@Body() requestBody: any, @Path() type: string): Promise<any> {
-    // console.log(request.user);
     const result =
       type == 'paypal'
         ? await new PaypalRepository().storeTransaction(requestBody)
@@ -76,6 +76,21 @@ export class PaymentController extends BaseController {
   @Get('charge/stripe/{id}')
   public async getStripe(@Path() id: string): Promise<any> {
     await new StripeRepository().getChargeById(id);
+
+    return this.handleResponse({ status: true }, HttpResponseCode.HTTP_OK, '');
+  }
+
+  @Post('callback/coinbase/success')
+  public async pcbc(@Request() request: any): Promise<any> {
+    const rawBody = request.rawBody;
+    const signature = request.headers['x-cc-webhook-signature'];
+    const webhookSecret = '7bb498e9-9fae-4305-b76c-97699c1a4eed';
+    const event = Webhook.verifyEventBody(rawBody, signature, webhookSecret);
+
+    const storeData = preparePaymentData(event.data ?? null);
+    // console.log({ rawBody, signature, webhookSecret, event_type: event?.type });
+    await new CoinbaseRepository().storeTransaction(storeData);
+    // await new StripeRepository().getChargeById(id);
 
     return this.handleResponse({ status: true }, HttpResponseCode.HTTP_OK, '');
   }

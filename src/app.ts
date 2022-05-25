@@ -24,7 +24,7 @@ class App {
 
   constructor() {
     this.app = express();
-    this.port = process.env.PORT || 3015;
+    this.port = process.env.APP_PORT || 3015;
     this.env = process.env.NODE_ENV === 'production' ? true : false;
 
     this.middleware();
@@ -88,7 +88,7 @@ class App {
   private initializeFirebase(): void {
     admin.initializeApp({
       credential: admin.credential.cert(serviceAccount),
-      databaseURL: process.env.DB_URL,
+      databaseURL: process.env.DB_URL || 'https://payment-app-4bc33-default-rtdb.firebaseio.com/',
     });
   }
 

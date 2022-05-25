@@ -28,7 +28,7 @@ class StripeRepository extends BaseRepository {
         amount: data.amount,
         currency: data.currency,
         created: data.created,
-        type: 'stripe',
+        payment_type: 'stripe',
       });
       return this.responseSuccess('', {});
     } catch (e: any) {

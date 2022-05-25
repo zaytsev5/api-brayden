@@ -14,7 +14,7 @@ class PaypalRepository extends BaseRepository {
     const { data } = await this.getPaymentById(params.payment.id);
 
     // const storeData = params.payment;
-    data.type = 'paypal';
+    data.payment_type = 'paypal';
     delete data.links;
     delete data.httpStatusCode;
 
