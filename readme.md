@@ -47,3 +47,4 @@ Example: http://localhost:3015/api/v1/docs
 - Routes & swagger: https://tsoa-community.github.io/docs
 
 - A
+- B
