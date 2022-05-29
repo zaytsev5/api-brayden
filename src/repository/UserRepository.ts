@@ -2,7 +2,10 @@ import * as admin from 'firebase-admin';
 import BaseRepository from './BaseRepository';
 import MailRepository from './MailRepository';
 import { USER_MODEL, LIMIT_2FA } from '../constants';
+import { CommonResponse } from '../types/global';
 import { randomCode } from '../utils/index';
+import QRCODE from 'qrcode';
+import { authenticator } from 'otplib';
 
 class UserRepository extends BaseRepository {
   protected db = admin.database().ref(USER_MODEL);
@@ -50,6 +53,42 @@ class UserRepository extends BaseRepository {
     } catch {
       return this.responseError('Failed to verify code, Please try again!');
     }
+  }
+
+  async signupG2fa(user: any): Promise<any> {
+    const result: CommonResponse = { status: true };
+    const secret = authenticator.generateSecret();
+    await this.db
+      .child(user.user_id)
+      .once('value')
+      .then((snapshot) => {
+        if (snapshot.exists()) snapshot.ref.child('secret_code').set(secret);
+      });
+    const data = await QRCODE.toDataURL(
+      `otpauth://totp/${process.env.APP_NAME}:${user.email}?secret=${secret}&issuer=${process.env.APP_NAME}`,
+    );
+    if (!data) {
+      result.message = 'Could not register 2fa authentication';
+      result.status = false;
+    } else result.data = data;
+
+    return result;
+  }
+
+  async verifyG2fa(code: string, user: any): Promise<any> {
+    return await this.db
+      .child(user.user_id)
+      .once('value')
+      .then((snapshot) => {
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          if (authenticator.check(code, data.secret_code)) {
+            snapshot.ref.child('verified_session').set(1);
+            return true;
+          }
+          return false;
+        }
+      });
   }
 }
 
