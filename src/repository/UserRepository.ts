@@ -57,13 +57,17 @@ class UserRepository extends BaseRepository {
 
   async signupG2fa(user: any): Promise<any> {
     const result: CommonResponse = { status: true };
-    const secret = authenticator.generateSecret();
+    let secret = authenticator.generateSecret();
     await this.db
       .child(user.user_id)
       .once('value')
       .then((snapshot) => {
-        if (snapshot.exists()) snapshot.ref.child('secret_code').set(secret);
+        if (snapshot.exists()) {
+          if (!snapshot.child('secret_code').exists()) snapshot.ref.child('secret_code').set(secret);
+          else secret = snapshot.val()['secret_code'];
+        }
       });
+
     const data = await QRCODE.toDataURL(
       `otpauth://totp/${process.env.APP_NAME}:${user.email}?secret=${secret}&issuer=${process.env.APP_NAME}`,
     );
