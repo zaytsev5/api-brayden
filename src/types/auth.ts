@@ -14,3 +14,7 @@ export interface AuthResponse {
   status?: boolean;
   message?: string;
 }
+
+export interface TwoFA {
+  code: string;
+}
